@@ -1,0 +1,34 @@
+<form [formGroup]="registerForm" (ngsubmit)="register()">
+  <h2 class="text-center text-primary">Sign Up</h2>
+  <hr>
+
+  <div class="form-group">
+    <input type="text" class="form-control" 
+     formControlName="userName" placeholder="Username">
+  </div>
+
+  <div class="form-group">
+    <input type="password" class="form-control" 
+   formControlName="password" 
+    placeholder="Password">
+  </div>
+  
+  <div class="form-group">
+    <input type="password" class="form-control" 
+   formControlName="confirmPassword" 
+    placeholder="Confirm password">
+  </div>
+
+  <div class="form-group text-center">
+    <button class="btn btn-success" type="submit" (click)="register()" >Register</button>
+    <button class="btn btn-default" type="button" (click)="cancel()">Cancel</button>
+  </div>
+  
+</form>
+
+<p>
+Form value {{registerForm.value | json}}
+</p>
+<p>
+Form value {{registerForm.status | json}}
+</p>
