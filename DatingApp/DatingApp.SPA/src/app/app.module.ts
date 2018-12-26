@@ -30,7 +30,7 @@ import { AuthGuard } from "./_guards/auth.guard";
 import { UserService } from "./_services/user.service";
 import { MemberEditComponent } from './members/member-edit/member-edit.component';
 import { PhotoEditorComponent } from './members/photo-editor/photo-editor.component';
-
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 export function tokenGetter() {
   return localStorage.getItem("token");
 }
@@ -55,6 +55,7 @@ export function tokenGetter() {
     FormsModule,
     ReactiveFormsModule,
     BsDropdownModule.forRoot(),
+    BsDatepickerModule.forRoot(),
     TabsModule.forRoot(),
     RouterModule,
     RouterModule.forRoot(appRoutes),
