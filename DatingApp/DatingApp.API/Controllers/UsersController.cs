@@ -10,54 +10,60 @@ using DatingApp.API.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DatingApp.API.Controllers
-{
-    [ServiceFilter(typeof(LogUserActivity))]
+namespace DatingApp.API.Controllers {
+    [ServiceFilter (typeof (LogUserActivity))]
     [Authorize]
-    [Route("api/[controller]")]
+    [Route ("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
-    {
+    public class UsersController : ControllerBase {
         private readonly IDatingRepository repo;
         private readonly IMapper mapper;
 
-        public UsersController(IDatingRepository repo, IMapper mapper)
-        {
+        public UsersController (IDatingRepository repo, IMapper mapper) {
             this.repo = repo;
             this.mapper = mapper;
         }
 
-        public async Task<IActionResult> GetUsers()
-        {
-            var users = await this.repo.GetUsers();
-            var userDtos = this.mapper.Map<IEnumerable<UserForListDto>>(users);
-            return Ok(userDtos);
-        }
+        [HttpGet]
+        public async Task<IActionResult> GetUsers ([FromQuery]UserParams userParams) {
 
-        [HttpGet("{id}", Name = "GetUser")]
-        public async Task<IActionResult> GetUser(int id)
-        {
-            var user = await this.repo.GetUser(id);
-            var userDto = this.mapper.Map<UserForDetailedDto>(user);
-            return Ok(userDto);
-        }
+            var currentUserId = int.Parse (User.FindFirst (ClaimTypes.NameIdentifier).Value);
+            var userFromRepo = await this.repo.GetUser(currentUserId);
+            userParams.UserId = currentUserId;
 
-         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto)
-        {
-            if(id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            if (string.IsNullOrEmpty(userParams.Gender))
             {
-                return Unauthorized();
+                userParams.Gender = userFromRepo.Gender == "male" ? "female" : "male";
             }
-             var userFromRepo = await this.repo.GetUser(id);
-            this.mapper.Map(userForUpdateDto,userFromRepo);
-   
-            if(await this.repo.SaveAll()){
-                return NoContent();
-                
+            var users = await this.repo.GetUsers (userParams);
+            var userDtos = this.mapper.Map<IEnumerable<UserForListDto>> (users);
+            Response.AddPagination(users.CurrentPage, 
+            users.PageSize, users.TotalCount, 
+            users.TotalsPages);
+            return Ok (userDtos);
+        }
+
+        [HttpGet ("{id}", Name = "GetUser")]
+        public async Task<IActionResult> GetUser (int id) {
+            var user = await this.repo.GetUser (id);
+            var userDto = this.mapper.Map<UserForDetailedDto> (user);
+            return Ok (userDto);
+        }
+
+        [HttpPut ("{id}")]
+        public async Task<IActionResult> UpdateUser (int id, UserForUpdateDto userForUpdateDto) {
+            if (id != int.Parse (User.FindFirst (ClaimTypes.NameIdentifier).Value)) {
+                return Unauthorized ();
             }
-            
-             throw new Exception($"Updating user {id} failed on save");
+            var userFromRepo = await this.repo.GetUser (id);
+            this.mapper.Map (userForUpdateDto, userFromRepo);
+
+            if (await this.repo.SaveAll ()) {
+                return NoContent ();
+
+            }
+
+            throw new Exception ($"Updating user {id} failed on save");
         }
     }
 }

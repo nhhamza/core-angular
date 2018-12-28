@@ -8,19 +8,20 @@ import { Resolve, ActivatedRouteSnapshot, Router } from "@angular/router";
 import { Observable, of } from "rxjs";
 
 @Injectable()
-export class MemberEditResolver implements Resolve<User> {
+export class MemberListResolver implements Resolve<User[]> {
+  pageNumber = 1;
+  pageSize = 5;
   constructor(
     private userService: UserService,
     private authService: AuthService,
     private router: Router,
     private alerty: AlertifyService
   ) {}
-  resolve(route: ActivatedRouteSnapshot): Observable<User> {
-    return this.userService.getUser(this.authService.decodedToken.nameid).pipe(
+  resolve(route: ActivatedRouteSnapshot): Observable<User[]> {
+    return this.userService.getUsers(this.pageNumber, this.pageSize).pipe(
       catchError(error => {
-        this.router.navigate(["/members"]);
-
-        this.alerty.error("Problem retriving your data");
+        this.alerty.error("problem retrieving data");
+        this.router.navigate(["/home"]);
         return of(null);
       })
     );
