@@ -57,8 +57,6 @@ export class UserService {
           paginationResult.result = response.body;
           const headers = response.headers;
           if (headers.get("pagination") != null) {
-            console.log(response.headers.get("pagination"));
-
             paginationResult.pagination = JSON.parse(headers.get("pagination"));
           }
           return paginationResult;
